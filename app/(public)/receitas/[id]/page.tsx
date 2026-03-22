@@ -1,10 +1,13 @@
 import { notFound } from 'next/navigation'
 import { getRecipe } from '@/lib/api/recipes'
+import { getMe } from '@/lib/api/users'
 import { getOptionalToken } from '@/lib/dal'
 import { LikeButton } from '@/components/recipes/LikeButton'
+import { DeleteRecipeButton } from '@/components/recipes/DeleteRecipeButton'
+import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Clock, Coffee, Droplets, User, Calendar } from 'lucide-react'
+import { Clock, Coffee, Droplets, User, Calendar, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import { ApiError } from '@/lib/api/client'
 
@@ -54,6 +57,9 @@ export default async function RecipePage({ params }: PageProps) {
   const token = await getOptionalToken()
   const isAuthenticated = !!token
 
+  const currentUser = isAuthenticated ? await getMe().catch(() => null) : null
+  const isOwner = !!currentUser && currentUser.id === recipe.user.id
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       {/* Header */}
@@ -67,20 +73,37 @@ export default async function RecipePage({ params }: PageProps) {
           <p className="mt-2 text-muted-foreground">{recipe.description}</p>
         )}
 
-        <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" />
-            <span>{recipe.user?.name}</span>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <User className="h-3.5 w-3.5" />
+              <span>{recipe.user?.name}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>{formatDate(recipe.created_at)}</span>
+            </div>
+            <LikeButton
+              recipeId={recipe.id}
+              initialLikes={recipe.likes_count}
+              isAuthenticated={isAuthenticated}
+            />
           </div>
-          <div className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5" />
-            <span>{formatDate(recipe.created_at)}</span>
-          </div>
-          <LikeButton
-            recipeId={recipe.id}
-            initialLikes={recipe.likes_count}
-            isAuthenticated={isAuthenticated}
-          />
+
+          {isOwner && (
+            <div className="flex items-center gap-1">
+              <LinkButton
+                href={`/receitas/${recipe.id}/editar`}
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+              >
+                <Pencil className="h-4 w-4 mr-1.5" />
+                Editar
+              </LinkButton>
+              <DeleteRecipeButton id={recipe.id} title={recipe.title} />
+            </div>
+          )}
         </div>
       </div>
 

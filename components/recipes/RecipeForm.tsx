@@ -57,6 +57,10 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
     })) ?? [{ id: 'step-0', description: '', duration_seconds: '' }]
   )
 
+  const [brewMethodId, setBrewMethodId] = useState(recipe?.brew_method.id.toString() ?? '')
+  const [recipeTypeId, setRecipeTypeId] = useState(recipe?.recipe_type.id.toString() ?? '')
+  const [visibility, setVisibility] = useState(recipe?.visibility ?? 'public')
+
   const [recipeIngredients, setRecipeIngredients] = useState<IngredientField[]>(
     recipe?.ingredients.map((ing, i) => ({
       id: `ing-${i}`,
@@ -220,9 +224,15 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Método de preparo</Label>
-            <Select name="brew_method_id" defaultValue={recipe?.brew_method.id.toString()}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar..." />
+            <Select
+              name="brew_method_id"
+              value={brewMethodId}
+              onValueChange={setBrewMethodId}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecionar...">
+                  {brewMethods.find((m) => m.id.toString() === brewMethodId)?.name ?? null}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {brewMethods.map((m) => (
@@ -239,9 +249,15 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
 
           <div className="space-y-1.5">
             <Label>Tipo de receita</Label>
-            <Select name="recipe_type_id" defaultValue={recipe?.recipe_type.id.toString()}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecionar..." />
+            <Select
+              name="recipe_type_id"
+              value={recipeTypeId}
+              onValueChange={setRecipeTypeId}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecionar...">
+                  {recipeTypes.find((t) => t.id.toString() === recipeTypeId)?.name ?? null}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {recipeTypes.map((t) => (
@@ -259,9 +275,11 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
 
         <div className="space-y-1.5">
           <Label>Visibilidade</Label>
-          <Select name="visibility" defaultValue={recipe?.visibility ?? 'public'}>
-            <SelectTrigger>
-              <SelectValue />
+          <Select name="visibility" value={visibility} onValueChange={setVisibility}>
+            <SelectTrigger className="w-full">
+              <SelectValue>
+                {visibility === 'public' ? 'Pública' : 'Privada'}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="public">Pública</SelectItem>
@@ -438,17 +456,38 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
           </Button>
         </div>
 
-        {recipeEquipment.map((eq) => (
-          <div key={eq.id} className="flex gap-2 items-start">
-            <GripVertical className="h-4 w-4 mt-2.5 shrink-0 text-muted-foreground/50" />
-            <div className="flex-1 grid grid-cols-3 gap-2">
-              <div className="col-span-2">
+        {recipeEquipment.map((eq) => {
+          const selectedEquip = equipment.find((e) => e.id.toString() === eq.equipmentId)
+          const isGrinder = selectedEquip?.type === 'grinder'
+          const displayLabel = selectedEquip
+            ? [selectedEquip.name, selectedEquip.brand, selectedEquip.model].filter(Boolean).join(' · ')
+            : null
+
+          return (
+            <div key={eq.id} className="flex gap-2 items-start">
+              <GripVertical className="h-4 w-4 mt-2.5 shrink-0 text-muted-foreground/50" />
+              <div className="flex flex-1 gap-2">
                 <Select
                   value={eq.equipmentId}
-                  onValueChange={(v) => updateEquipment(eq.id, 'equipmentId', v ?? '')}
+                  onValueChange={(v) => {
+                    const newEquip = equipment.find((e) => e.id.toString() === v)
+                    setRecipeEquipment((prev) =>
+                      prev.map((e) =>
+                        e.id === eq.id
+                          ? {
+                              ...e,
+                              equipmentId: v ?? '',
+                              grinder_clicks: newEquip?.type !== 'grinder' ? '' : e.grinder_clicks,
+                            }
+                          : e
+                      )
+                    )
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Equipamento" />
+                  <SelectTrigger className="w-full flex-1 min-w-0">
+                    <SelectValue placeholder="Selecionar equipamento">
+                      {displayLabel}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {equipment.map((e) => (
@@ -458,26 +497,29 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
                     ))}
                   </SelectContent>
                 </Select>
+                {isGrinder && (
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder="Cliques"
+                    value={eq.grinder_clicks}
+                    onChange={(e) => updateEquipment(eq.id, 'grinder_clicks', e.target.value)}
+                    className="w-28 shrink-0"
+                  />
+                )}
               </div>
-              <Input
-                type="number"
-                min="1"
-                placeholder="Cliques (moedor)"
-                value={eq.grinder_clicks}
-                onChange={(e) => updateEquipment(eq.id, 'grinder_clicks', e.target.value)}
-              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="shrink-0 mt-0.5 text-muted-foreground"
+                onClick={() => removeEquipment(eq.id)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 mt-0.5 text-muted-foreground"
-              onClick={() => removeEquipment(eq.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        ))}
+          )
+        })}
       </section>
 
       {/* Steps */}

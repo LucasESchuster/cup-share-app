@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { verifySession } from '@/lib/dal'
 import { createRecipe, updateRecipe, deleteRecipe, updateRecipeVisibility } from '@/lib/api/recipes'
 import { RecipeFormSchema } from '@/lib/types'
@@ -41,6 +42,7 @@ export async function createRecipeAction(
     revalidatePath('/')
     redirect(`/receitas/${recipe.id}`)
   } catch (err: unknown) {
+    if (isRedirectError(err)) throw err
     if (err && typeof err === 'object' && 'errors' in err) {
       return { errors: (err as { errors: Record<string, string[]> }).errors }
     }
@@ -79,6 +81,7 @@ export async function updateRecipeAction(
     revalidatePath('/')
     redirect(`/receitas/${id}`)
   } catch (err: unknown) {
+    if (isRedirectError(err)) throw err
     if (err && typeof err === 'object' && 'errors' in err) {
       return { errors: (err as { errors: Record<string, string[]> }).errors }
     }
