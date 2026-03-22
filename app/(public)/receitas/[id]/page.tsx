@@ -73,22 +73,24 @@ export default async function RecipePage({ params }: PageProps) {
   const isAuthenticated = !!token
 
   const currentUser = isAuthenticated ? await getMe().catch(() => null) : null
+
   const isOwner = !!currentUser && currentUser.id === recipe.user.id
+  const isLiked = recipe.liked_by_me
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-3xl px-4 py-10">
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2 mb-3">
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-2 mb-4">
           {recipe.brew_method && <Badge variant="secondary">{recipe.brew_method.name}</Badge>}
           {recipe.recipe_type && <Badge variant="outline">{recipe.recipe_type.name}</Badge>}
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">{recipe.title}</h1>
+        <h1 className="font-heading text-4xl font-semibold tracking-tight leading-tight">{recipe.title}</h1>
         {recipe.description && (
-          <p className="mt-2 text-muted-foreground">{recipe.description}</p>
+          <p className="mt-3 text-muted-foreground leading-relaxed text-base">{recipe.description}</p>
         )}
 
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <User className="h-3.5 w-3.5" />
@@ -101,7 +103,9 @@ export default async function RecipePage({ params }: PageProps) {
             <LikeButton
               recipeId={recipe.id}
               initialLikes={recipe.likes_count}
+              initialIsLiked={isLiked}
               isAuthenticated={isAuthenticated}
+              isOwner={isOwner}
             />
           </div>
 
@@ -122,39 +126,39 @@ export default async function RecipePage({ params }: PageProps) {
         </div>
       </div>
 
-      <Separator className="my-6" />
+      <Separator className="my-7" />
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-8">
-        <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
-          <Coffee className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-          <p className="text-lg font-semibold">{recipe.coffee_grams}g</p>
-          <p className="text-xs text-muted-foreground">Café</p>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-10">
+        <div className="rounded-xl border border-border/50 bg-card p-4 text-center">
+          <Coffee className="h-4 w-4 mx-auto mb-2 text-amber" />
+          <p className="text-xl font-semibold tabular-nums">{recipe.coffee_grams}g</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Café</p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
-          <Droplets className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-          <p className="text-lg font-semibold">{recipe.water_ml ?? recipe.yield_ml}ml</p>
-          <p className="text-xs text-muted-foreground">{recipe.water_ml ? 'Água' : 'Extração'}</p>
+        <div className="rounded-xl border border-border/50 bg-card p-4 text-center">
+          <Droplets className="h-4 w-4 mx-auto mb-2 text-amber" />
+          <p className="text-xl font-semibold tabular-nums">{recipe.water_ml ?? recipe.yield_ml}ml</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{recipe.water_ml ? 'Água' : 'Extração'}</p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
-          <Clock className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
-          <p className="text-lg font-semibold">{formatBrewTime(recipe.brew_time_seconds)}</p>
-          <p className="text-xs text-muted-foreground">Tempo</p>
+        <div className="rounded-xl border border-border/50 bg-card p-4 text-center">
+          <Clock className="h-4 w-4 mx-auto mb-2 text-amber" />
+          <p className="text-xl font-semibold tabular-nums">{formatBrewTime(recipe.brew_time_seconds)}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Tempo</p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-card p-4 text-center">
-          <p className="text-lg font-semibold font-mono">{recipe.ratio}</p>
-          <p className="text-xs text-muted-foreground">Proporção</p>
+        <div className="rounded-xl border border-border/50 bg-card p-4 text-center">
+          <p className="text-xl font-semibold font-mono tabular-nums">{recipe.ratio}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Proporção</p>
         </div>
       </div>
 
       {/* Ingredients */}
       {recipe.ingredients.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Ingredientes</h2>
+        <section className="mb-10">
+          <h2 className="font-heading text-xl font-semibold mb-4">Ingredientes</h2>
           <ul className="space-y-2">
             {recipe.ingredients.map((ing) => (
-              <li key={ing.id} className="flex items-center justify-between text-sm rounded-md border border-border/60 bg-card px-4 py-2.5">
-                <span>{ing.name}</span>
+              <li key={ing.id} className="flex items-center justify-between text-sm rounded-xl border border-border/50 bg-card px-4 py-3">
+                <span className="font-medium">{ing.name}</span>
                 <span className="text-muted-foreground tabular-nums">
                   {ing.pivot.quantity} {ing.pivot.unit}
                 </span>
@@ -166,18 +170,18 @@ export default async function RecipePage({ params }: PageProps) {
 
       {/* Steps */}
       {recipe.steps.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Passo a passo</h2>
-          <ol className="space-y-3">
+        <section className="mb-10">
+          <h2 className="font-heading text-xl font-semibold mb-4">Passo a passo</h2>
+          <ol className="space-y-4">
             {recipe.steps.map((step) => (
               <li key={step.order} className="flex gap-4">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-medium">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber text-amber-foreground text-xs font-semibold">
                   {step.order}
                 </span>
-                <div className="flex-1 pt-0.5">
-                  <p className="text-sm">{step.description}</p>
+                <div className="flex-1 pt-1">
+                  <p className="text-sm leading-relaxed">{step.description}</p>
                   {step.duration_seconds && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-1 font-mono">
                       {formatBrewTime(step.duration_seconds)}
                     </p>
                   )}
@@ -190,18 +194,18 @@ export default async function RecipePage({ params }: PageProps) {
 
       {/* Equipment */}
       {recipe.equipment.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">Equipamentos</h2>
+        <section className="mb-10">
+          <h2 className="font-heading text-xl font-semibold mb-4">Equipamentos</h2>
           <ul className="space-y-2">
             {recipe.equipment.map((eq) => (
-              <li key={eq.id} className="flex items-center justify-between text-sm rounded-md border border-border/60 bg-card px-4 py-2.5">
+              <li key={eq.id} className="flex items-center justify-between text-sm rounded-xl border border-border/50 bg-card px-4 py-3">
                 <div>
                   <span className="font-medium">{eq.name}</span>
                   {eq.brand && <span className="text-muted-foreground"> · {eq.brand}</span>}
                   {eq.model && <span className="text-muted-foreground"> {eq.model}</span>}
                 </div>
                 {eq.pivot.grinder_clicks && (
-                  <span className="text-muted-foreground text-xs">{eq.pivot.grinder_clicks} cliques</span>
+                  <span className="text-muted-foreground text-xs font-mono">{eq.pivot.grinder_clicks} cliques</span>
                 )}
               </li>
             ))}
@@ -214,14 +218,14 @@ export default async function RecipePage({ params }: PageProps) {
         const embedUrl = getYouTubeEmbedUrl(recipe.video_url!)
         return embedUrl ? (
           <section>
-            <h2 className="text-lg font-semibold mb-3">Vídeo</h2>
+            <h2 className="font-heading text-xl font-semibold mb-4">Vídeo</h2>
             <div className="aspect-video w-full">
               <iframe
                 src={embedUrl}
                 title="YouTube video player"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="h-full w-full rounded-lg"
+                className="h-full w-full rounded-xl"
               />
             </div>
           </section>

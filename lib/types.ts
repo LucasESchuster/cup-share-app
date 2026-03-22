@@ -82,6 +82,7 @@ export interface Recipe {
   water_temperature_celsius: number | null
   coffee_description: string | null
   likes_count: number
+  liked_by_me: boolean
   video_url: string | null
   brew_method: BrewMethod
   recipe_type: RecipeType
@@ -95,6 +96,7 @@ export interface Recipe {
 
 export interface LikesCount {
   likes_count: number
+  liked_by_me: boolean
 }
 
 // ─── Paginated response (Laravel) ────────────────────────────────────────────

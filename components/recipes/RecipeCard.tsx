@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Clock, Heart, Coffee, Droplets } from 'lucide-react'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Clock, Coffee, Droplets } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
+import { LikeButton } from './LikeButton'
 import type { Recipe } from '@/lib/types'
 
 function formatBrewTime(seconds: number): string {
@@ -11,56 +11,71 @@ function formatBrewTime(seconds: number): string {
   return s > 0 ? `${m}min ${s}s` : `${m}min`
 }
 
-export function RecipeCard({ recipe }: { recipe: Recipe }) {
+interface RecipeCardProps {
+  recipe: Recipe
+  currentUserId?: number
+  isAuthenticated?: boolean
+}
+
+export function RecipeCard({ recipe, currentUserId, isAuthenticated = false }: RecipeCardProps) {
+  const isOwner = !!currentUserId && currentUserId === recipe.user?.id
   return (
-    <Link href={`/receitas/${recipe.id}`} className="group block">
-      <Card className="h-full transition-shadow hover:shadow-md border-border/60">
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2">
+    <Link href={`/receitas/${recipe.id}`} className="group block h-full">
+      <article className="flex h-full flex-col rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-foreground/5 hover:border-border/80">
+        {/* Top section */}
+        <div className="flex-1">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <h2 className="font-heading text-base font-semibold leading-snug group-hover:text-amber transition-colors line-clamp-2">
               {recipe.title}
             </h2>
             {recipe.brew_method && (
-              <Badge variant="secondary" className="shrink-0 text-xs">
+              <Badge variant="secondary" className="shrink-0 text-xs mt-0.5">
                 {recipe.brew_method.name}
               </Badge>
             )}
           </div>
           {recipe.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
               {recipe.description}
             </p>
           )}
-        </CardHeader>
+        </div>
 
-        <CardContent className="pb-2">
-          <div className="grid grid-cols-3 gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Coffee className="h-3 w-3 shrink-0" />
-              <span>{recipe.coffee_grams}g</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Droplets className="h-3 w-3 shrink-0" />
-              <span>{recipe.water_ml ?? recipe.yield_ml}ml</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 shrink-0" />
-              <span>{formatBrewTime(recipe.brew_time_seconds)}</span>
-            </div>
+        {/* Stats */}
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="flex flex-col items-center rounded-lg bg-accent/50 px-2 py-2 text-center">
+            <Coffee className="h-3.5 w-3.5 shrink-0 text-muted-foreground mb-1" />
+            <span className="text-sm font-medium tabular-nums">{recipe.coffee_grams}g</span>
+            <span className="text-[10px] text-muted-foreground">café</span>
           </div>
-          <p className="mt-2 text-xs font-mono text-muted-foreground">
-            Proporção {recipe.ratio}
-          </p>
-        </CardContent>
+          <div className="flex flex-col items-center rounded-lg bg-accent/50 px-2 py-2 text-center">
+            <Droplets className="h-3.5 w-3.5 shrink-0 text-muted-foreground mb-1" />
+            <span className="text-sm font-medium tabular-nums">{recipe.water_ml ?? recipe.yield_ml}ml</span>
+            <span className="text-[10px] text-muted-foreground">{recipe.water_ml ? 'água' : 'extração'}</span>
+          </div>
+          <div className="flex flex-col items-center rounded-lg bg-accent/50 px-2 py-2 text-center">
+            <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground mb-1" />
+            <span className="text-sm font-medium tabular-nums">{formatBrewTime(recipe.brew_time_seconds)}</span>
+            <span className="text-[10px] text-muted-foreground">tempo</span>
+          </div>
+        </div>
 
-        <CardFooter className="pt-2 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">{recipe.user?.name}</span>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Heart className="h-3 w-3" />
-            <span>{recipe.likes_count}</span>
+        {/* Footer */}
+        <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{recipe.user?.name}</span>
+            <span className="text-muted-foreground/40">·</span>
+            <span className="text-xs font-mono text-muted-foreground">{recipe.ratio}</span>
           </div>
-        </CardFooter>
-      </Card>
+          <LikeButton
+            recipeId={recipe.id}
+            initialLikes={recipe.likes_count}
+            initialIsLiked={recipe.liked_by_me}
+            isAuthenticated={isAuthenticated}
+            isOwner={isOwner}
+          />
+        </div>
+      </article>
     </Link>
   )
 }

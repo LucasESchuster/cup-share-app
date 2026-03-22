@@ -1,4 +1,3 @@
-import { Coffee } from 'lucide-react'
 import { MagicLinkForm } from '@/components/auth/MagicLinkForm'
 import type { Metadata } from 'next'
 
@@ -20,19 +19,16 @@ export default async function EntrarPage({ searchParams }: PageProps) {
   const errorMessage = erro ? errorMessages[erro] : undefined
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4 py-12">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm space-y-7">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-            <Coffee className="h-6 w-6 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight">Cup Share</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <h1 className="font-heading text-3xl font-semibold tracking-tight">Cup Share</h1>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
             Entre com seu e-mail para acessar sua conta.
           </p>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-card p-6 shadow-sm">
+        <div className="rounded-2xl border border-border/50 bg-card p-7 shadow-sm shadow-foreground/5">
           <MagicLinkForm errorMessage={errorMessage} />
         </div>
       </div>

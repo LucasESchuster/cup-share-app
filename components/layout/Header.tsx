@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Coffee } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { ThemeToggle } from './ThemeToggle'
 import { UserMenu } from './UserMenu'
@@ -10,15 +9,17 @@ export async function Header() {
   const isAuthenticated = !!cookieStore.get('cup_share_token')?.value
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-foreground">
-          <Coffee className="h-5 w-5 text-primary" />
-          <span>Cup Share</span>
+    <header className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+        <Link href="/" className="flex items-center gap-2.5 text-foreground hover:opacity-80 transition-opacity">
+          <span className="font-heading text-xl font-semibold tracking-tight leading-none">Cup Share</span>
         </Link>
 
-        <nav className="flex items-center gap-1">
-          <Link href="/" className="hidden text-sm text-muted-foreground hover:text-foreground transition-colors px-2 sm:block">
+        <nav className="flex items-center gap-0.5">
+          <Link
+            href="/"
+            className="hidden text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-lg hover:bg-accent/60 sm:block"
+          >
             Receitas
           </Link>
 
@@ -27,7 +28,7 @@ export async function Header() {
           {isAuthenticated ? (
             <UserMenu />
           ) : (
-            <LinkButton href="/entrar" size="sm" className="ml-1">
+            <LinkButton href="/entrar" size="sm" className="ml-1.5">
               Entrar
             </LinkButton>
           )}
