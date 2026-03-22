@@ -3,6 +3,7 @@ import { getRecipe } from '@/lib/api/recipes'
 import { getMe } from '@/lib/api/users'
 import { getOptionalToken } from '@/lib/dal'
 import { LikeButton } from '@/components/recipes/LikeButton'
+import { RecipeSteps } from '@/components/recipes/RecipeSteps'
 import { DeleteRecipeButton } from '@/components/recipes/DeleteRecipeButton'
 import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from '@/components/ui/badge'
@@ -171,24 +172,8 @@ export default async function RecipePage({ params }: PageProps) {
       {/* Steps */}
       {recipe.steps.length > 0 && (
         <section className="mb-10">
-          <h2 className="font-heading text-xl font-semibold mb-4">Passo a passo</h2>
-          <ol className="space-y-4">
-            {recipe.steps.map((step) => (
-              <li key={step.order} className="flex gap-4">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber text-amber-foreground text-xs font-semibold">
-                  {step.order}
-                </span>
-                <div className="flex-1 pt-1">
-                  <p className="text-sm leading-relaxed">{step.description}</p>
-                  {step.duration_seconds && (
-                    <p className="text-xs text-muted-foreground mt-1 font-mono">
-                      {formatBrewTime(step.duration_seconds)}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
+          <h2 className="font-heading text-xl font-semibold mb-5">Passo a passo</h2>
+          <RecipeSteps steps={recipe.steps} />
         </section>
       )}
 
