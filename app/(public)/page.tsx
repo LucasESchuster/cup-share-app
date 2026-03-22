@@ -3,12 +3,11 @@ import { cookies } from 'next/headers'
 import { getRecipes } from '@/lib/api/recipes'
 import { getMe } from '@/lib/api/users'
 import { RecipeGrid } from '@/components/recipes/RecipeGrid'
+import { LinkButton } from '@/components/ui/link-button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Plus } from 'lucide-react'
 
-async function RecipesFeed() {
-  const cookieStore = await cookies()
-  const isAuthenticated = !!cookieStore.get('cup_share_token')?.value
-
+async function RecipesFeed({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [recipes, currentUser] = await Promise.all([
     getRecipes(),
     isAuthenticated ? getMe().catch(() => null) : Promise.resolve(null),
@@ -48,20 +47,32 @@ function RecipesFeedSkeleton() {
   )
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cookieStore = await cookies()
+  const isAuthenticated = !!cookieStore.get('cup_share_token')?.value
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <div className="mb-10">
-        <h1 className="font-heading text-4xl font-semibold tracking-tight leading-tight">
-          Receitas
-        </h1>
-        <p className="mt-2 text-muted-foreground max-w-md leading-relaxed">
-          Descubra receitas de café compartilhadas pela comunidade.
-        </p>
+      <div className="mb-10 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-heading text-4xl font-semibold tracking-tight leading-tight">
+            Receitas
+          </h1>
+          <p className="mt-2 text-muted-foreground max-w-md leading-relaxed">
+            Descubra receitas de café compartilhadas pela comunidade.
+          </p>
+        </div>
+
+        {isAuthenticated && (
+          <LinkButton href="/receitas/nova" className="shrink-0 gap-1.5">
+            <Plus className="h-4 w-4" />
+            Nova receita
+          </LinkButton>
+        )}
       </div>
 
       <Suspense fallback={<RecipesFeedSkeleton />}>
-        <RecipesFeed />
+        <RecipesFeed isAuthenticated={isAuthenticated} />
       </Suspense>
     </div>
   )
