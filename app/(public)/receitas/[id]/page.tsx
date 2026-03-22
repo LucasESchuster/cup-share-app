@@ -35,6 +35,21 @@ function formatBrewTime(seconds: number): string {
   return s > 0 ? `${m}min ${s}s` : `${m}min`
 }
 
+function getYouTubeEmbedUrl(url: string): string | null {
+  try {
+    const parsed = new URL(url)
+    let videoId: string | null = null
+    if (parsed.hostname.includes('youtube.com')) {
+      videoId = parsed.searchParams.get('v')
+    } else if (parsed.hostname === 'youtu.be') {
+      videoId = parsed.pathname.slice(1)
+    }
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null
+  } catch {
+    return null
+  }
+}
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: 'numeric',
@@ -175,7 +190,7 @@ export default async function RecipePage({ params }: PageProps) {
 
       {/* Equipment */}
       {recipe.equipment.length > 0 && (
-        <section>
+        <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3">Equipamentos</h2>
           <ul className="space-y-2">
             {recipe.equipment.map((eq) => (
@@ -193,6 +208,25 @@ export default async function RecipePage({ params }: PageProps) {
           </ul>
         </section>
       )}
+
+      {/* Video */}
+      {recipe.video_url && (() => {
+        const embedUrl = getYouTubeEmbedUrl(recipe.video_url!)
+        return embedUrl ? (
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Vídeo</h2>
+            <div className="aspect-video w-full">
+              <iframe
+                src={embedUrl}
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="h-full w-full rounded-lg"
+              />
+            </div>
+          </section>
+        ) : null
+      })()}
     </div>
   )
 }

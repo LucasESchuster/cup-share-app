@@ -79,7 +79,10 @@ export interface Recipe {
   yield_ml: number | null
   ratio: string
   brew_time_seconds: number
+  water_temperature_celsius: number | null
+  coffee_description: string | null
   likes_count: number
+  video_url: string | null
   brew_method: BrewMethod
   recipe_type: RecipeType
   user: User
@@ -138,7 +141,10 @@ export const RecipeFormSchema = z
     water_ml: z.number().int().positive().nullable().optional(),
     yield_ml: z.number().int().positive().nullable().optional(),
     brew_time_seconds: z.number().int().positive('Tempo de preparo obrigatório'),
+    water_temperature_celsius: z.number().int().min(0).max(100).nullable().optional(),
+    coffee_description: z.string().max(1000).nullable().optional(),
     visibility: z.enum(['public', 'private']),
+    video_url: z.union([z.string().url('URL de vídeo inválida'), z.literal(''), z.null()]).optional(),
     steps: z.array(RecipeStepSchema).min(1, 'Adicione pelo menos um passo'),
     ingredients: z.array(RecipeIngredientSchema).optional().default([]),
     equipment: z.array(RecipeEquipmentSchema).optional().default([]),
