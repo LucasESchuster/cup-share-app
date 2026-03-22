@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { createRecipeAction, updateRecipeAction } from '@/app/actions/recipes'
 import type { BrewMethod, RecipeType, Ingredient, Equipment, Recipe } from '@/lib/types'
 
@@ -354,24 +355,14 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label>Método de preparo</Label>
-            <Select
+            <Combobox
               name="brew_method_id"
               value={brewMethodId}
               onValueChange={setBrewMethodId}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecionar...">
-                  {brewMethods.find((m) => m.id.toString() === brewMethodId)?.name ?? null}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {brewMethods.map((m) => (
-                  <SelectItem key={m.id} value={m.id.toString()}>
-                    {m.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={brewMethods.map((m) => ({ value: m.id.toString(), label: m.name }))}
+              placeholder="Selecionar método..."
+              searchPlaceholder="Buscar método..."
+            />
             {fieldError('brew_method_id') && (
               <p className="text-xs text-destructive">{fieldError('brew_method_id')}</p>
             )}
@@ -379,24 +370,14 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
 
           <div className="space-y-1.5">
             <Label>Tipo de receita</Label>
-            <Select
+            <Combobox
               name="recipe_type_id"
               value={recipeTypeId}
               onValueChange={setRecipeTypeId}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecionar...">
-                  {recipeTypes.find((t) => t.id.toString() === recipeTypeId)?.name ?? null}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {recipeTypes.map((t) => (
-                  <SelectItem key={t.id} value={t.id.toString()}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={recipeTypes.map((t) => ({ value: t.id.toString(), label: t.name }))}
+              placeholder="Selecionar tipo..."
+              searchPlaceholder="Buscar tipo..."
+            />
             {fieldError('recipe_type_id') && (
               <p className="text-xs text-destructive">{fieldError('recipe_type_id')}</p>
             )}
