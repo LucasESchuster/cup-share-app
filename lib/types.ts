@@ -2,17 +2,21 @@ import { z } from 'zod'
 
 // ─── Reference types ─────────────────────────────────────────────────────────
 
+export type BrewMethodCategory = 'filter' | 'espresso' | 'pressure' | 'cold_brew'
+
+export const categoryLabels: Record<BrewMethodCategory, string> = {
+  filter: 'Filtrado',
+  espresso: 'Espresso',
+  pressure: 'Pressão',
+  cold_brew: 'Cold Brew',
+}
+
 export interface BrewMethod {
   id: number
   name: string
   slug: string
+  category: BrewMethodCategory
   description: string | null
-}
-
-export interface RecipeType {
-  id: number
-  name: string
-  slug: string
 }
 
 export interface Ingredient {
@@ -56,7 +60,6 @@ export interface RecipeEquipment extends Equipment {
 export interface RecipeStep {
   order: number
   description: string
-  duration_seconds: number | null
 }
 
 export interface RecipeIngredient extends Ingredient {
@@ -85,7 +88,6 @@ export interface Recipe {
   liked_by_me: boolean
   video_url: string | null
   brew_method: BrewMethod
-  recipe_type: RecipeType
   user: User
   steps: RecipeStep[]
   ingredients: RecipeIngredient[]
@@ -119,7 +121,6 @@ export interface ApiValidationError {
 export const RecipeStepSchema = z.object({
   order: z.number().int().positive(),
   description: z.string().min(1, 'Descrição obrigatória'),
-  duration_seconds: z.number().int().positive().nullable(),
 })
 
 export const RecipeIngredientSchema = z.object({
@@ -138,7 +139,6 @@ export const RecipeFormSchema = z
     title: z.string().min(1, 'Título obrigatório').max(255),
     description: z.string().nullable().optional(),
     brew_method_id: z.number().int().positive('Método de preparo obrigatório'),
-    recipe_type_id: z.number().int().positive('Tipo de receita obrigatório'),
     coffee_grams: z.number().positive('Quantidade de café deve ser positiva'),
     water_ml: z.number().int().positive().nullable().optional(),
     yield_ml: z.number().int().positive().nullable().optional(),

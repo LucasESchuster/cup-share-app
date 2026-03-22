@@ -1,14 +1,6 @@
 'use client'
 
-import { Clock } from 'lucide-react'
 import type { RecipeStep } from '@/lib/types'
-
-function formatBrewTime(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  const m = Math.floor(seconds / 60)
-  const s = seconds % 60
-  return s > 0 ? `${m}min ${s}s` : `${m}min`
-}
 
 export function RecipeSteps({ steps }: { steps: RecipeStep[] }) {
   return (
@@ -32,14 +24,6 @@ export function RecipeSteps({ steps }: { steps: RecipeStep[] }) {
           {/* Conteúdo */}
           <div className="flex-1 rounded-xl border border-border/50 bg-card px-4 py-3">
             <p className="text-sm leading-relaxed">{step.description}</p>
-            {step.duration_seconds && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <Clock className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-mono">
-                  {formatBrewTime(step.duration_seconds)}
-                </span>
-              </div>
-            )}
           </div>
         </li>
       ))}

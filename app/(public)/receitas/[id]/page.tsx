@@ -11,6 +11,8 @@ import { Separator } from '@/components/ui/separator'
 import { Clock, Coffee, Droplets, User, Calendar, Pencil } from 'lucide-react'
 import type { Metadata } from 'next'
 import { ApiError } from '@/lib/api/client'
+import { categoryLabels } from '@/lib/types'
+import type { BrewMethodCategory } from '@/lib/types'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -84,7 +86,9 @@ export default async function RecipePage({ params }: PageProps) {
       <div className="mb-8">
         <div className="flex flex-wrap gap-2 mb-4">
           {recipe.brew_method && <Badge variant="secondary">{recipe.brew_method.name}</Badge>}
-          {recipe.recipe_type && <Badge variant="outline">{recipe.recipe_type.name}</Badge>}
+          {recipe.brew_method?.category && (
+            <Badge variant="outline">{categoryLabels[recipe.brew_method.category as BrewMethodCategory]}</Badge>
+          )}
         </div>
         <h1 className="font-heading text-4xl font-semibold tracking-tight leading-tight">{recipe.title}</h1>
         {recipe.description && (

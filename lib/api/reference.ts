@@ -1,6 +1,6 @@
 import 'server-only'
 import { apiFetch } from './client'
-import type { BrewMethod, RecipeType, Ingredient, Paginated } from '@/lib/types'
+import type { BrewMethod, Ingredient, Paginated } from '@/lib/types'
 
 function unwrap<T>(response: T[] | Paginated<T>): T[] {
   if (Array.isArray(response)) return response
@@ -9,11 +9,6 @@ function unwrap<T>(response: T[] | Paginated<T>): T[] {
 
 export async function getBrewMethods(): Promise<BrewMethod[]> {
   const res = await apiFetch<BrewMethod[] | Paginated<BrewMethod>>('/brew-methods')
-  return unwrap(res)
-}
-
-export async function getRecipeTypes(): Promise<RecipeType[]> {
-  const res = await apiFetch<RecipeType[] | Paginated<RecipeType>>('/recipe-types')
   return unwrap(res)
 }
 

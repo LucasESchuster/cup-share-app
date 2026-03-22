@@ -1,4 +1,4 @@
-import { getBrewMethods, getRecipeTypes, getIngredients } from '@/lib/api/reference'
+import { getBrewMethods, getIngredients } from '@/lib/api/reference'
 import { getEquipment } from '@/lib/api/equipment'
 import { RecipeForm } from '@/components/recipes/RecipeForm'
 import type { Metadata } from 'next'
@@ -8,9 +8,8 @@ export const metadata: Metadata = {
 }
 
 export default async function NovaReceitaPage() {
-  const [brewMethods, recipeTypes, ingredients, equipment] = await Promise.all([
+  const [brewMethods, ingredients, equipment] = await Promise.all([
     getBrewMethods(),
-    getRecipeTypes(),
     getIngredients(),
     getEquipment(),
   ])
@@ -26,7 +25,6 @@ export default async function NovaReceitaPage() {
 
       <RecipeForm
         brewMethods={brewMethods}
-        recipeTypes={recipeTypes}
         ingredients={ingredients}
         equipment={equipment}
       />

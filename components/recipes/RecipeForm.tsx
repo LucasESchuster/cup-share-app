@@ -16,13 +16,12 @@ import {
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { createRecipeAction, updateRecipeAction } from '@/app/actions/recipes'
-import type { BrewMethod, RecipeType, Ingredient, Equipment, Recipe } from '@/lib/types'
+import type { BrewMethod, Ingredient, Equipment, Recipe } from '@/lib/types'
 
 const DRAFT_KEY = 'cup-share:recipe-draft'
 
 interface RecipeFormProps {
   brewMethods: BrewMethod[]
-  recipeTypes: RecipeType[]
   ingredients: Ingredient[]
   equipment: Equipment[]
   recipe?: Recipe
@@ -31,7 +30,6 @@ interface RecipeFormProps {
 interface StepField {
   id: string
   description: string
-  duration_seconds: string
 }
 
 interface IngredientField {
@@ -51,7 +49,6 @@ interface RecipeDraft {
   title: string
   description: string
   brewMethodId: string
-  recipeTypeId: string
   visibility: string
   coffeeGrams: string
   brewTimeSeconds: string
@@ -66,7 +63,7 @@ interface RecipeDraft {
   recipeEquipment: EquipmentField[]
 }
 
-export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, recipe }: RecipeFormProps) {
+export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: RecipeFormProps) {
   const isEditing = !!recipe
   const [isPending, startTransition] = useTransition()
   const [errors, setErrors] = useState<Record<string, string[]>>({})
@@ -81,15 +78,13 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
   const [yieldMl, setYieldMl] = useState(recipe?.yield_ml?.toString() ?? '')
 
   const [brewMethodId, setBrewMethodId] = useState(recipe?.brew_method.id.toString() ?? '')
-  const [recipeTypeId, setRecipeTypeId] = useState(recipe?.recipe_type.id.toString() ?? '')
   const [visibility, setVisibility] = useState(recipe?.visibility ?? 'public')
 
   const [steps, setSteps] = useState<StepField[]>(
     recipe?.steps.map((s, i) => ({
       id: `step-${i}`,
       description: s.description,
-      duration_seconds: s.duration_seconds?.toString() ?? '',
-    })) ?? [{ id: 'step-0', description: '', duration_seconds: '' }]
+    })) ?? [{ id: 'step-0', description: '' }]
   )
 
   const [recipeIngredients, setRecipeIngredients] = useState<IngredientField[]>(
@@ -138,7 +133,6 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
             setTitle(draft.title)
             setDescription(draft.description)
             setBrewMethodId(draft.brewMethodId)
-            setRecipeTypeId(draft.recipeTypeId)
             setVisibility(draft.visibility)
             setCoffeeGrams(draft.coffeeGrams)
             setBrewTimeSeconds(draft.brewTimeSeconds)
@@ -174,7 +168,7 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
     if (isEditing || !draftResolved) return
     const timer = setTimeout(() => {
       const draft: RecipeDraft = {
-        title, description, brewMethodId, recipeTypeId, visibility,
+        title, description, brewMethodId, visibility,
         coffeeGrams, brewTimeSeconds, waterMl, yieldMl, useYield, videoUrl,
         waterTemperatureCelsius, coffeeDescription,
         steps, recipeIngredients, recipeEquipment,
@@ -183,7 +177,7 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
     }, 800)
     return () => clearTimeout(timer)
   }, [
-    title, description, brewMethodId, recipeTypeId, visibility,
+    title, description, brewMethodId, visibility,
     coffeeGrams, brewTimeSeconds, waterMl, yieldMl, useYield, videoUrl,
     waterTemperatureCelsius, coffeeDescription,
     steps, recipeIngredients, recipeEquipment, isEditing, draftResolved,
@@ -192,7 +186,7 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
   function addStep() {
     setSteps((prev) => [
       ...prev,
-      { id: `step-${Date.now()}`, description: '', duration_seconds: '' },
+      { id: `step-${Date.now()}`, description: '' },
     ])
   }
 
@@ -251,7 +245,6 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
       const stepsData = steps.map((s, idx) => ({
         order: idx + 1,
         description: s.description,
-        duration_seconds: s.duration_seconds ? parseInt(s.duration_seconds) : null,
       }))
 
       const ingredientsData = recipeIngredients.map((i) => ({
@@ -352,36 +345,19 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
           )}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label>Método de preparo</Label>
-            <Combobox
-              name="brew_method_id"
-              value={brewMethodId}
-              onValueChange={setBrewMethodId}
-              options={brewMethods.map((m) => ({ value: m.id.toString(), label: m.name }))}
-              placeholder="Selecionar método..."
-              searchPlaceholder="Buscar método..."
-            />
-            {fieldError('brew_method_id') && (
-              <p className="text-xs text-destructive">{fieldError('brew_method_id')}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Tipo de receita</Label>
-            <Combobox
-              name="recipe_type_id"
-              value={recipeTypeId}
-              onValueChange={setRecipeTypeId}
-              options={recipeTypes.map((t) => ({ value: t.id.toString(), label: t.name }))}
-              placeholder="Selecionar tipo..."
-              searchPlaceholder="Buscar tipo..."
-            />
-            {fieldError('recipe_type_id') && (
-              <p className="text-xs text-destructive">{fieldError('recipe_type_id')}</p>
-            )}
-          </div>
+        <div className="space-y-1.5">
+          <Label>Método de preparo</Label>
+          <Combobox
+            name="brew_method_id"
+            value={brewMethodId}
+            onValueChange={setBrewMethodId}
+            options={brewMethods.map((m) => ({ value: m.id.toString(), label: m.name }))}
+            placeholder="Selecionar método..."
+            searchPlaceholder="Buscar método..."
+          />
+          {fieldError('brew_method_id') && (
+            <p className="text-xs text-destructive">{fieldError('brew_method_id')}</p>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -695,21 +671,12 @@ export function RecipeForm({ brewMethods, recipeTypes, ingredients, equipment, r
             <span className="flex h-6 w-6 shrink-0 mt-2 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs">
               {idx + 1}
             </span>
-            <div className="flex-1 grid grid-cols-3 gap-2">
-              <Input
-                className="col-span-2"
-                placeholder="Descrição do passo"
-                value={step.description}
-                onChange={(e) => updateStep(step.id, 'description', e.target.value)}
-              />
-              <Input
-                type="number"
-                min="0"
-                placeholder="Duração (s)"
-                value={step.duration_seconds}
-                onChange={(e) => updateStep(step.id, 'duration_seconds', e.target.value)}
-              />
-            </div>
+            <Input
+              className="flex-1"
+              placeholder="Descrição do passo"
+              value={step.description}
+              onChange={(e) => updateStep(step.id, 'description', e.target.value)}
+            />
             {idx > 0 && (
               <Button
                 type="button"
