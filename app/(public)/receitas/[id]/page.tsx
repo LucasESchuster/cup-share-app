@@ -156,23 +156,6 @@ export default async function RecipePage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Ingredients */}
-      {recipe.ingredients.length > 0 && (
-        <section className="mb-10">
-          <h2 className="font-heading text-xl font-semibold mb-4">Ingredientes</h2>
-          <ul className="space-y-2">
-            {recipe.ingredients.map((ing) => (
-              <li key={ing.id} className="flex items-center justify-between text-sm rounded-xl border border-border/50 bg-card px-4 py-3">
-                <span className="font-medium">{ing.name}</span>
-                <span className="text-muted-foreground tabular-nums">
-                  {ing.pivot.quantity} {ing.pivot.unit}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {/* Steps */}
       {recipe.steps.length > 0 && (
         <section className="mb-10">

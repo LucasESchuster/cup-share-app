@@ -16,13 +16,12 @@ import {
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { createRecipeAction, updateRecipeAction } from '@/app/actions/recipes'
-import type { BrewMethod, Ingredient, Equipment, Recipe } from '@/lib/types'
+import type { BrewMethod, Equipment, Recipe } from '@/lib/types'
 
 const DRAFT_KEY = 'cup-share:recipe-draft'
 
 interface RecipeFormProps {
   brewMethods: BrewMethod[]
-  ingredients: Ingredient[]
   equipment: Equipment[]
   recipe?: Recipe
 }
@@ -30,13 +29,6 @@ interface RecipeFormProps {
 interface StepField {
   id: string
   description: string
-}
-
-interface IngredientField {
-  id: string
-  ingredientId: string
-  quantity: string
-  unit: string
 }
 
 interface EquipmentField {
@@ -59,11 +51,10 @@ interface RecipeDraft {
   waterTemperatureCelsius: string
   coffeeDescription: string
   steps: StepField[]
-  recipeIngredients: IngredientField[]
   recipeEquipment: EquipmentField[]
 }
 
-export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: RecipeFormProps) {
+export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) {
   const isEditing = !!recipe
   const [isPending, startTransition] = useTransition()
   const [errors, setErrors] = useState<Record<string, string[]>>({})
@@ -85,15 +76,6 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
       id: `step-${i}`,
       description: s.description,
     })) ?? [{ id: 'step-0', description: '' }]
-  )
-
-  const [recipeIngredients, setRecipeIngredients] = useState<IngredientField[]>(
-    recipe?.ingredients.map((ing, i) => ({
-      id: `ing-${i}`,
-      ingredientId: ing.id.toString(),
-      quantity: ing.pivot.quantity.toString(),
-      unit: ing.pivot.unit,
-    })) ?? []
   )
 
   const [recipeEquipment, setRecipeEquipment] = useState<EquipmentField[]>(
@@ -143,7 +125,6 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
             setWaterTemperatureCelsius(draft.waterTemperatureCelsius ?? '')
             setCoffeeDescription(draft.coffeeDescription ?? '')
             setSteps(draft.steps)
-            setRecipeIngredients(draft.recipeIngredients)
             setRecipeEquipment(draft.recipeEquipment)
             setDraftResolved(true)
           },
@@ -171,7 +152,7 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
         title, description, brewMethodId, visibility,
         coffeeGrams, brewTimeSeconds, waterMl, yieldMl, useYield, videoUrl,
         waterTemperatureCelsius, coffeeDescription,
-        steps, recipeIngredients, recipeEquipment,
+        steps, recipeEquipment,
       }
       localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
     }, 800)
@@ -180,7 +161,7 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
     title, description, brewMethodId, visibility,
     coffeeGrams, brewTimeSeconds, waterMl, yieldMl, useYield, videoUrl,
     waterTemperatureCelsius, coffeeDescription,
-    steps, recipeIngredients, recipeEquipment, isEditing, draftResolved,
+    steps, recipeEquipment, isEditing, draftResolved,
   ])
 
   function addStep() {
@@ -196,27 +177,6 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
 
   function updateStep(id: string, field: keyof Omit<StepField, 'id'>, value: string) {
     setSteps((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: value } : s)))
-  }
-
-  function addIngredient() {
-    setRecipeIngredients((prev) => [
-      ...prev,
-      { id: `ing-${Date.now()}`, ingredientId: '', quantity: '', unit: 'ml' },
-    ])
-  }
-
-  function removeIngredient(id: string) {
-    setRecipeIngredients((prev) => prev.filter((i) => i.id !== id))
-  }
-
-  function updateIngredient(
-    id: string,
-    field: keyof Omit<IngredientField, 'id'>,
-    value: string
-  ) {
-    setRecipeIngredients((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, [field]: value } : i))
-    )
   }
 
   function addEquipment() {
@@ -247,19 +207,12 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
         description: s.description,
       }))
 
-      const ingredientsData = recipeIngredients.map((i) => ({
-        id: parseInt(i.ingredientId),
-        quantity: parseFloat(i.quantity),
-        unit: i.unit,
-      }))
-
       const equipmentData = recipeEquipment.map((e) => ({
         id: parseInt(e.equipmentId),
         grinder_clicks: e.grinder_clicks ? parseInt(e.grinder_clicks) : null,
       }))
 
       formData.set('steps', JSON.stringify(stepsData))
-      formData.set('ingredients', JSON.stringify(ingredientsData))
       formData.set('equipment', JSON.stringify(equipmentData))
 
       if (useYield) {
@@ -281,7 +234,7 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
         if (result?.error) setGeneralError(result.error)
       })
     },
-    [steps, recipeIngredients, recipeEquipment, useYield, isEditing, recipe]
+    [steps, recipeEquipment, useYield, isEditing, recipe]
   )
 
   function fieldError(field: string) {
@@ -492,69 +445,6 @@ export function RecipeForm({ brewMethods, ingredients, equipment, recipe }: Reci
             )}
           </div>
         </div>
-      </section>
-
-      {/* Ingredients */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
-            Ingredientes <span className="normal-case font-normal text-muted-foreground">(opcional)</span>
-          </h2>
-          <Button type="button" variant="ghost" size="sm" onClick={addIngredient}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Adicionar
-          </Button>
-        </div>
-
-        {recipeIngredients.map((ing) => (
-          <div key={ing.id} className="flex gap-2 items-start">
-            <GripVertical className="h-4 w-4 mt-2.5 shrink-0 text-muted-foreground/50" />
-            <div className="flex-1 grid grid-cols-3 gap-2">
-              <div className="col-span-1">
-                <Select
-                  value={ing.ingredientId}
-                  onValueChange={(v) => updateIngredient(ing.id, 'ingredientId', v ?? '')}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Ingrediente" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ingredients.map((i) => (
-                      <SelectItem key={i.id} value={i.id.toString()}>
-                        {i.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Input
-                type="number"
-                min="0"
-                step="0.1"
-                placeholder="Qtd."
-                value={ing.quantity}
-                onChange={(e) => updateIngredient(ing.id, 'quantity', e.target.value)}
-              />
-              <Input
-                placeholder="ml, g..."
-                value={ing.unit}
-                onChange={(e) => updateIngredient(ing.id, 'unit', e.target.value)}
-              />
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 mt-0.5 text-muted-foreground"
-              onClick={() => removeIngredient(ing.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        ))}
-
-        {fieldError('ingredients') && (
-          <p className="text-xs text-destructive">{fieldError('ingredients')}</p>
-        )}
       </section>
 
       {/* Equipment */}

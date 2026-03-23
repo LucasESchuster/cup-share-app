@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { getRecipe } from '@/lib/api/recipes'
-import { getBrewMethods, getIngredients } from '@/lib/api/reference'
+import { getBrewMethods } from '@/lib/api/reference'
 import { getEquipment } from '@/lib/api/equipment'
 import { verifySession } from '@/lib/dal'
 import { RecipeForm } from '@/components/recipes/RecipeForm'
@@ -33,9 +33,8 @@ export default async function EditarReceitaPage({ params }: PageProps) {
     throw err
   }
 
-  const [brewMethods, ingredients, equipment] = await Promise.all([
+  const [brewMethods, equipment] = await Promise.all([
     getBrewMethods(),
-    getIngredients(),
     getEquipment(),
   ])
 
@@ -48,7 +47,6 @@ export default async function EditarReceitaPage({ params }: PageProps) {
 
       <RecipeForm
         brewMethods={brewMethods}
-        ingredients={ingredients}
         equipment={equipment}
         recipe={recipe}
       />

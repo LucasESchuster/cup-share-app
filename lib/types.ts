@@ -19,12 +19,6 @@ export interface BrewMethod {
   description: string | null
 }
 
-export interface Ingredient {
-  id: number
-  name: string
-  slug: string
-}
-
 // ─── User ─────────────────────────────────────────────────────────────────────
 
 export interface User {
@@ -62,13 +56,6 @@ export interface RecipeStep {
   description: string
 }
 
-export interface RecipeIngredient extends Ingredient {
-  pivot: {
-    quantity: number
-    unit: string
-  }
-}
-
 export type RecipeVisibility = 'public' | 'private'
 
 export interface Recipe {
@@ -90,7 +77,6 @@ export interface Recipe {
   brew_method: BrewMethod
   user: User
   steps: RecipeStep[]
-  ingredients: RecipeIngredient[]
   equipment: RecipeEquipment[]
   created_at: string
   updated_at: string
@@ -123,12 +109,6 @@ export const RecipeStepSchema = z.object({
   description: z.string().min(1, 'Descrição obrigatória'),
 })
 
-export const RecipeIngredientSchema = z.object({
-  id: z.number().int().positive(),
-  quantity: z.number().positive('Quantidade deve ser positiva'),
-  unit: z.string().min(1, 'Unidade obrigatória'),
-})
-
 export const RecipeEquipmentSchema = z.object({
   id: z.number().int().positive(),
   grinder_clicks: z.number().int().positive().nullable().optional(),
@@ -148,7 +128,6 @@ export const RecipeFormSchema = z
     visibility: z.enum(['public', 'private']),
     video_url: z.union([z.string().url('URL de vídeo inválida'), z.literal(''), z.null()]).optional(),
     steps: z.array(RecipeStepSchema).min(1, 'Adicione pelo menos um passo'),
-    ingredients: z.array(RecipeIngredientSchema).optional().default([]),
     equipment: z.array(RecipeEquipmentSchema).optional().default([]),
   })
   .refine(

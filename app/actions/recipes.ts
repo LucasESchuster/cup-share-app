@@ -31,7 +31,6 @@ export async function createRecipeAction(
     coffee_description: (raw.coffee_description as string) || null,
     video_url: (raw.video_url as string) || null,
     steps: JSON.parse(raw.steps as string),
-    ingredients: JSON.parse(raw.ingredients as string),
     equipment: JSON.parse((raw.equipment as string) || '[]'),
   })
 
@@ -71,7 +70,6 @@ export async function updateRecipeAction(
     coffee_description: (raw.coffee_description as string) || null,
     video_url: (raw.video_url as string) || null,
     steps: JSON.parse(raw.steps as string),
-    ingredients: JSON.parse(raw.ingredients as string),
     equipment: JSON.parse((raw.equipment as string) || '[]'),
   })
 
