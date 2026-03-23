@@ -19,7 +19,7 @@ export async function requestMagicLink(
       },
       body: JSON.stringify({
         email,
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        callback_url: `${process.env.APP_URL}/auth/callback`,
       }),
     })
 
