@@ -44,7 +44,7 @@ interface RecipeDraft {
   title: string
   description: string
   brewMethodId: string
-  visibility: string
+  visibility: 'public' | 'private'
   coffeeGrams: string
   brewTimeSeconds: string
   waterMl: string
@@ -324,7 +324,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
 
         <div className="space-y-1.5">
           <Label>Visibilidade</Label>
-          <Select name="visibility" value={visibility} onValueChange={setVisibility}>
+          <Select name="visibility" value={visibility} onValueChange={(v) => v && setVisibility(v as 'public' | 'private')}>
             <SelectTrigger className="w-full">
               <SelectValue>
                 {visibility === 'public' ? 'Pública' : 'Privada'}
