@@ -17,7 +17,10 @@ export async function requestMagicLink(
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({
+        email,
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      }),
     })
 
     if (!res.ok && res.status !== 202) {
