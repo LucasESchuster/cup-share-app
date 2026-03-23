@@ -250,7 +250,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
       )}
 
       {/* Basic info */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
           Informações básicas
         </h2>
@@ -330,7 +330,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
       </section>
 
       {/* Measurements */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
           Medidas
         </h2>
@@ -448,7 +448,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
       </section>
 
       {/* Equipment */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
             Equipamentos <span className="normal-case font-normal text-muted-foreground">(opcional)</span>
@@ -525,7 +525,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
       </section>
 
       {/* Video */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
           Vídeo <span className="normal-case font-normal text-muted-foreground">(opcional)</span>
         </h2>
@@ -546,7 +546,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
       </section>
 
       {/* Steps */}
-      <section className="space-y-4">
+      <section className="space-y-4 rounded-xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
           <h2 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">
             Passo a passo
