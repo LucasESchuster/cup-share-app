@@ -1,6 +1,5 @@
 import Link from 'next/link'
-import { getMe, getMyRecipes, getMyEquipment } from '@/lib/api/users'
-import { EquipmentList } from '@/components/equipment/EquipmentList'
+import { getMe, getMyRecipes } from '@/lib/api/users'
 import { ProfileForm } from '@/components/auth/ProfileForm'
 import { RecipeCard } from '@/components/recipes/RecipeCard'
 import { Separator } from '@/components/ui/separator'
@@ -13,10 +12,9 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = { title: 'Meu perfil' }
 
 export default async function PerfilPage() {
-  const [user, recipes, equipment] = await Promise.all([
+  const [user, recipes] = await Promise.all([
     getMe(),
     getMyRecipes(),
-    getMyEquipment(),
   ])
 
   return (
@@ -29,7 +27,6 @@ export default async function PerfilPage() {
       <Tabs defaultValue="receitas">
         <TabsList className="mb-6">
           <TabsTrigger value="receitas">Receitas ({recipes.length})</TabsTrigger>
-          <TabsTrigger value="equipamentos">Equipamentos</TabsTrigger>
           <TabsTrigger value="conta">Conta</TabsTrigger>
         </TabsList>
 
@@ -52,10 +49,6 @@ export default async function PerfilPage() {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        <TabsContent value="equipamentos">
-          <EquipmentList equipment={equipment} />
         </TabsContent>
 
         <TabsContent value="conta" className="space-y-6">

@@ -141,11 +141,3 @@ export const RecipeFormSchema = z
 
 export type RecipeFormValues = z.infer<typeof RecipeFormSchema>
 
-export const EquipmentFormSchema = z.object({
-  name: z.string().min(1, 'Nome obrigatório').max(255),
-  brand: z.string().nullable().optional(),
-  model: z.string().nullable().optional(),
-  type: z.enum(['grinder', 'espresso_machine', 'scale', 'dripper', 'kettle', 'other']),
-})
-
-export type EquipmentFormValues = z.infer<typeof EquipmentFormSchema>

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { User, BookOpen, Wrench, LogOut } from 'lucide-react'
+import { User, BookOpen, LogOut } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,10 +30,6 @@ export function UserMenu() {
         <DropdownMenuItem render={<Link href="/receitas/nova" />}>
           <BookOpen className="h-3.5 w-3.5" />
           Nova receita
-        </DropdownMenuItem>
-        <DropdownMenuItem render={<Link href="/equipamentos" />}>
-          <Wrench className="h-3.5 w-3.5" />
-          Equipamentos
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

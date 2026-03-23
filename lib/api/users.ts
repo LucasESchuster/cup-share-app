@@ -1,6 +1,6 @@
 import 'server-only'
 import { apiFetch } from './client'
-import type { User, Recipe, Equipment, Paginated } from '@/lib/types'
+import type { User, Recipe, Paginated } from '@/lib/types'
 
 function unwrap<T>(response: T[] | Paginated<T>): T[] {
   if (Array.isArray(response)) return response
@@ -33,10 +33,5 @@ export function deleteMe(): Promise<void> {
 
 export async function getMyRecipes(): Promise<Recipe[]> {
   const res = await apiFetch<Recipe[] | Paginated<Recipe>>('/users/me/recipes')
-  return unwrap(res)
-}
-
-export async function getMyEquipment(): Promise<Equipment[]> {
-  const res = await apiFetch<Equipment[] | Paginated<Equipment>>('/users/me/equipment')
   return unwrap(res)
 }
