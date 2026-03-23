@@ -29,18 +29,20 @@ export function getRecipeLikes(id: number | string): Promise<LikesCount> {
   return apiFetch(`/recipes/${id}/likes`)
 }
 
-export function createRecipe(data: RecipeFormValues): Promise<Recipe> {
-  return apiFetch('/recipes', {
+export async function createRecipe(data: RecipeFormValues): Promise<Recipe> {
+  const res = await apiFetch<Recipe | { data: Recipe }>('/recipes', {
     method: 'POST',
     body: JSON.stringify(data),
   })
+  return unwrapOne(res)
 }
 
-export function updateRecipe(id: number | string, data: RecipeFormValues): Promise<Recipe> {
-  return apiFetch(`/recipes/${id}`, {
+export async function updateRecipe(id: number | string, data: RecipeFormValues): Promise<Recipe> {
+  const res = await apiFetch<Recipe | { data: Recipe }>(`/recipes/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   })
+  return unwrapOne(res)
 }
 
 export function deleteRecipe(id: number | string): Promise<void> {

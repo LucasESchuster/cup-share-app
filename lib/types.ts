@@ -42,11 +42,12 @@ export interface Equipment {
   is_global: boolean
 }
 
-export interface RecipeEquipment extends Equipment {
-  pivot: {
-    grinder_clicks: number | null
-    parameters: Record<string, unknown> | null
-  }
+export interface RecipeEquipment {
+  id: number
+  custom_name: string | null
+  grinder_clicks: number | null
+  parameters: Record<string, unknown> | null
+  equipment: Equipment | null
 }
 
 // ─── Recipe ───────────────────────────────────────────────────────────────────
@@ -109,10 +110,16 @@ export const RecipeStepSchema = z.object({
   description: z.string().min(1, 'Descrição obrigatória'),
 })
 
-export const RecipeEquipmentSchema = z.object({
-  id: z.number().int().positive(),
-  grinder_clicks: z.number().int().positive().nullable().optional(),
-})
+export const RecipeEquipmentSchema = z.union([
+  z.object({
+    equipment_id: z.number().int().positive(),
+    grinder_clicks: z.number().int().positive().nullable().optional(),
+  }),
+  z.object({
+    custom_name: z.string().min(1),
+    grinder_clicks: z.number().int().positive().nullable().optional(),
+  }),
+])
 
 export const RecipeFormSchema = z
   .object({

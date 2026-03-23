@@ -33,7 +33,10 @@ interface StepField {
 
 interface EquipmentField {
   id: string
+  mode: 'list' | 'custom'
   equipmentId: string
+  customName: string
+  customIsGrinder: boolean
   grinder_clicks: string
 }
 
@@ -81,8 +84,11 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
   const [recipeEquipment, setRecipeEquipment] = useState<EquipmentField[]>(
     recipe?.equipment.map((eq, i) => ({
       id: `eq-${i}`,
-      equipmentId: eq.id.toString(),
-      grinder_clicks: eq.pivot.grinder_clicks?.toString() ?? '',
+      mode: eq.equipment !== null ? 'list' : 'custom',
+      equipmentId: eq.equipment?.id.toString() ?? '',
+      customName: eq.custom_name ?? '',
+      customIsGrinder: eq.equipment === null && eq.grinder_clicks !== null,
+      grinder_clicks: eq.grinder_clicks?.toString() ?? '',
     })) ?? []
   )
 
@@ -182,7 +188,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
   function addEquipment() {
     setRecipeEquipment((prev) => [
       ...prev,
-      { id: `eq-${Date.now()}`, equipmentId: '', grinder_clicks: '' },
+      { id: `eq-${Date.now()}`, mode: 'list', equipmentId: '', customName: '', customIsGrinder: false, grinder_clicks: '' },
     ])
   }
 
@@ -207,10 +213,13 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
         description: s.description,
       }))
 
-      const equipmentData = recipeEquipment.map((e) => ({
-        id: parseInt(e.equipmentId),
-        grinder_clicks: e.grinder_clicks ? parseInt(e.grinder_clicks) : null,
-      }))
+      const equipmentData = recipeEquipment.map((e) => {
+        const clicks = e.grinder_clicks ? parseInt(e.grinder_clicks) : null
+        if (e.mode === 'list') {
+          return { equipment_id: parseInt(e.equipmentId), grinder_clicks: clicks }
+        }
+        return { custom_name: e.customName, grinder_clicks: clicks }
+      })
 
       formData.set('steps', JSON.stringify(stepsData))
       formData.set('equipment', JSON.stringify(equipmentData))
@@ -460,7 +469,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
 
         {recipeEquipment.map((eq) => {
           const selectedEquip = equipment.find((e) => e.id.toString() === eq.equipmentId)
-          const isGrinder = selectedEquip?.type === 'grinder'
+          const isGrinder = eq.mode === 'list' ? selectedEquip?.type === 'grinder' : eq.customIsGrinder
           const displayLabel = selectedEquip
             ? [selectedEquip.name, selectedEquip.brand, selectedEquip.model].filter(Boolean).join(' · ')
             : null
@@ -468,47 +477,84 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
           return (
             <div key={eq.id} className="flex gap-2 items-start">
               <GripVertical className="h-4 w-4 mt-2.5 shrink-0 text-muted-foreground/50" />
-              <div className="flex flex-1 gap-2">
-                <Select
-                  value={eq.equipmentId}
-                  onValueChange={(v) => {
-                    const newEquip = equipment.find((e) => e.id.toString() === v)
-                    setRecipeEquipment((prev) =>
-                      prev.map((e) =>
-                        e.id === eq.id
-                          ? {
-                              ...e,
-                              equipmentId: v ?? '',
-                              grinder_clicks: newEquip?.type !== 'grinder' ? '' : e.grinder_clicks,
-                            }
-                          : e
-                      )
-                    )
-                  }}
-                >
-                  <SelectTrigger className="w-full flex-1 min-w-0">
-                    <SelectValue placeholder="Selecionar equipamento">
-                      {displayLabel}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {equipment.map((e) => (
-                      <SelectItem key={e.id} value={e.id.toString()}>
-                        {e.name}{e.brand ? ` · ${e.brand}` : ''}{e.model ? ` ${e.model}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {isGrinder && (
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Cliques"
-                    value={eq.grinder_clicks}
-                    onChange={(e) => updateEquipment(eq.id, 'grinder_clicks', e.target.value)}
-                    className="w-28 shrink-0"
-                  />
-                )}
+              <div className="flex-1 space-y-2">
+                {/* Mode toggle */}
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => updateEquipment(eq.id, 'mode', 'list')}
+                    className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${eq.mode === 'list' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background'}`}
+                  >
+                    Lista global
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateEquipment(eq.id, 'mode', 'custom')}
+                    className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${eq.mode === 'custom' ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background'}`}
+                  >
+                    Personalizado
+                  </button>
+                </div>
+
+                <div className="flex gap-2">
+                  {eq.mode === 'list' ? (
+                    <Combobox
+                      className="flex-1 min-w-0"
+                      value={eq.equipmentId}
+                      onValueChange={(v) => {
+                        const newEquip = equipment.find((e) => e.id.toString() === v)
+                        setRecipeEquipment((prev) =>
+                          prev.map((e) =>
+                            e.id === eq.id
+                              ? { ...e, equipmentId: v ?? '', grinder_clicks: newEquip?.type !== 'grinder' ? '' : e.grinder_clicks }
+                              : e
+                          )
+                        )
+                      }}
+                      options={equipment.map((e) => ({
+                        value: e.id.toString(),
+                        label: [e.name, e.brand, e.model].filter(Boolean).join(' · '),
+                      }))}
+                      placeholder="Selecionar equipamento..."
+                      searchPlaceholder="Buscar equipamento..."
+                    />
+                  ) : (
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        placeholder="Nome do equipamento"
+                        value={eq.customName}
+                        onChange={(e) => updateEquipment(eq.id, 'customName', e.target.value)}
+                      />
+                      <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none w-fit">
+                        <input
+                          type="checkbox"
+                          checked={eq.customIsGrinder}
+                          onChange={(e) => {
+                            setRecipeEquipment((prev) =>
+                              prev.map((item) =>
+                                item.id === eq.id
+                                  ? { ...item, customIsGrinder: e.target.checked, grinder_clicks: e.target.checked ? item.grinder_clicks : '' }
+                                  : item
+                              )
+                            )
+                          }}
+                          className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
+                        />
+                        Moedor
+                      </label>
+                    </div>
+                  )}
+                  {isGrinder && (
+                    <Input
+                      type="number"
+                      min="1"
+                      placeholder="Cliques"
+                      value={eq.grinder_clicks}
+                      onChange={(e) => updateEquipment(eq.id, 'grinder_clicks', e.target.value)}
+                      className="w-28 shrink-0"
+                    />
+                  )}
+                </div>
               </div>
               <Button
                 type="button"
@@ -585,6 +631,19 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
           <p className="text-xs text-destructive">{fieldError('steps')}</p>
         )}
       </section>
+
+      {Object.keys(errors).length > 0 && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 space-y-1">
+          <p className="text-sm font-medium text-destructive">Ops, parece que temos alguns problemas:</p>
+          <ul className="list-disc list-inside space-y-0.5">
+            {Object.entries(errors).map(([, messages]) =>
+              messages.map((msg, i) => (
+                <li key={`${msg}-${i}`} className="text-xs text-destructive">{msg}</li>
+              ))
+            )}
+          </ul>
+        </div>
+      )}
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" disabled={isPending} className="flex-1 sm:flex-none">

@@ -186,12 +186,12 @@ export default async function RecipePage({ params }: PageProps) {
             {recipe.equipment.map((eq) => (
               <li key={eq.id} className="flex items-center justify-between text-sm rounded-xl border border-border/50 bg-card px-4 py-3">
                 <div>
-                  <span className="font-medium">{eq.name}</span>
-                  {eq.brand && <span className="text-muted-foreground"> · {eq.brand}</span>}
-                  {eq.model && <span className="text-muted-foreground"> {eq.model}</span>}
+                  <span className="font-medium">{eq.equipment?.name ?? eq.custom_name}</span>
+                  {eq.equipment?.brand && <span className="text-muted-foreground"> · {eq.equipment.brand}</span>}
+                  {eq.equipment?.model && <span className="text-muted-foreground"> {eq.equipment.model}</span>}
                 </div>
-                {eq.pivot.grinder_clicks && (
-                  <span className="text-muted-foreground text-xs font-mono">{eq.pivot.grinder_clicks} cliques</span>
+                {eq.grinder_clicks && (
+                  <span className="text-muted-foreground text-xs font-mono">{eq.grinder_clicks} cliques</span>
                 )}
               </li>
             ))}
