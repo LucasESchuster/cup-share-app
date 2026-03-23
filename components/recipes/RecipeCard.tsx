@@ -1,8 +1,15 @@
 import Link from 'next/link'
-import { Clock, Coffee, Droplets } from 'lucide-react'
+import { Clock, Coffee, Droplets, Flame, Snowflake, Zap } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { LikeButton } from './LikeButton'
-import type { Recipe } from '@/lib/types'
+import type { Recipe, BrewMethodCategory } from '@/lib/types'
+
+const categoryIcons: Record<BrewMethodCategory, React.ElementType> = {
+  filter: Coffee,
+  espresso: Zap,
+  pressure: Flame,
+  cold_brew: Snowflake,
+}
 
 function formatBrewTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`
@@ -19,6 +26,9 @@ interface RecipeCardProps {
 
 export function RecipeCard({ recipe, currentUserId, isAuthenticated = false }: RecipeCardProps) {
   const isOwner = !!currentUserId && currentUserId === recipe.user?.id
+  const CategoryIcon = recipe.brew_method?.category
+    ? categoryIcons[recipe.brew_method.category as BrewMethodCategory]
+    : null
   return (
     <Link href={`/receitas/${recipe.id}`} className="group block h-full">
       <article className="flex h-full flex-col rounded-xl border border-border/50 bg-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-foreground/5 hover:border-border/80">
@@ -29,7 +39,8 @@ export function RecipeCard({ recipe, currentUserId, isAuthenticated = false }: R
               {recipe.title}
             </h2>
             {recipe.brew_method && (
-              <Badge variant="secondary" className="shrink-0 text-xs mt-0.5">
+              <Badge variant="secondary" className="shrink-0 text-xs mt-0.5 gap-1">
+                {CategoryIcon && <CategoryIcon className="h-3 w-3" />}
                 {recipe.brew_method.name}
               </Badge>
             )}

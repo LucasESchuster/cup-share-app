@@ -8,11 +8,18 @@ import { DeleteRecipeButton } from '@/components/recipes/DeleteRecipeButton'
 import { LinkButton } from '@/components/ui/link-button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Clock, Coffee, Droplets, User, Calendar, Pencil } from 'lucide-react'
+import { Clock, Coffee, Droplets, Flame, Snowflake, User, Calendar, Pencil, Zap } from 'lucide-react'
 import type { Metadata } from 'next'
 import { ApiError } from '@/lib/api/client'
 import { categoryLabels } from '@/lib/types'
 import type { BrewMethodCategory } from '@/lib/types'
+
+const categoryIcons: Record<BrewMethodCategory, React.ElementType> = {
+  filter: Coffee,
+  espresso: Zap,
+  pressure: Flame,
+  cold_brew: Snowflake,
+}
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -86,9 +93,16 @@ export default async function RecipePage({ params }: PageProps) {
       <div className="mb-8">
         <div className="flex flex-wrap gap-2 mb-4">
           {recipe.brew_method && <Badge variant="secondary">{recipe.brew_method.name}</Badge>}
-          {recipe.brew_method?.category && (
-            <Badge variant="outline">{categoryLabels[recipe.brew_method.category as BrewMethodCategory]}</Badge>
-          )}
+          {recipe.brew_method?.category && (() => {
+            const cat = recipe.brew_method.category as BrewMethodCategory
+            const Icon = categoryIcons[cat]
+            return (
+              <Badge variant="outline" className="gap-1">
+                <Icon className="h-3 w-3" />
+                {categoryLabels[cat]}
+              </Badge>
+            )
+          })()}
         </div>
         <h1 className="font-heading text-4xl font-semibold tracking-tight leading-tight">{recipe.title}</h1>
         {recipe.description && (

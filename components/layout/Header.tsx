@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { cookies } from 'next/headers'
+import { Coffee } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { UserMenu } from './UserMenu'
 import { LinkButton } from '@/components/ui/link-button'
@@ -11,7 +12,8 @@ export async function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2.5 text-foreground hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity">
+          <Coffee className="h-4 w-4 text-amber" />
           <span className="font-heading text-xl font-semibold tracking-tight leading-none">Cup Share</span>
         </Link>
 

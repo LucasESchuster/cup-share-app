@@ -59,7 +59,7 @@ export default async function HomePage() {
             Receitas
           </h1>
           <p className="mt-2 text-muted-foreground max-w-md leading-relaxed">
-            Descubra receitas de café compartilhadas pela comunidade.
+            Descubra e compartilhe receitas de café feitas pela comunidade.
           </p>
         </div>
 
