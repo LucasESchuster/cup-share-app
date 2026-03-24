@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useCallback, useEffect } from 'react'
 import { Plus, Trash2, Loader2, GripVertical } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -73,6 +74,9 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
 
   const [brewMethodId, setBrewMethodId] = useState(recipe?.brew_method.id.toString() ?? '')
   const [visibility, setVisibility] = useState(recipe?.visibility ?? 'public')
+
+  const [dragIndex, setDragIndex]       = useState<number | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
 
   const [steps, setSteps] = useState<StepField[]>(
     recipe?.steps.map((s, i) => ({
@@ -169,6 +173,39 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
     waterTemperatureCelsius, coffeeDescription,
     steps, recipeEquipment, isEditing, draftResolved,
   ])
+
+  function handleStepDragStart(e: React.DragEvent, i: number) {
+    setDragIndex(i)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function handleStepDragOver(e: React.DragEvent, i: number) {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (dragOverIndex !== i) setDragOverIndex(i)
+  }
+
+  function handleStepDrop(e: React.DragEvent, i: number) {
+    e.preventDefault()
+    if (dragIndex === null || dragIndex === i) {
+      setDragIndex(null)
+      setDragOverIndex(null)
+      return
+    }
+    setSteps((prev) => {
+      const next = [...prev]
+      const [removed] = next.splice(dragIndex, 1)
+      next.splice(i, 0, removed)
+      return next
+    })
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }
+
+  function handleStepDragEnd() {
+    setDragIndex(null)
+    setDragOverIndex(null)
+  }
 
   function addStep() {
     setSteps((prev) => [
@@ -603,8 +640,22 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
         </div>
 
         {steps.map((step, idx) => (
-          <div key={step.id} className="flex gap-2 items-start">
-            <span className="flex h-6 w-6 shrink-0 mt-2 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs">
+          <div
+            key={step.id}
+            draggable
+            onDragStart={(e) => handleStepDragStart(e, idx)}
+            onDragOver={(e) => handleStepDragOver(e, idx)}
+            onDragLeave={() => setDragOverIndex(null)}
+            onDrop={(e) => handleStepDrop(e, idx)}
+            onDragEnd={handleStepDragEnd}
+            className={cn(
+              'flex gap-2 items-start rounded-lg transition-all duration-150',
+              dragIndex === idx && 'opacity-30',
+              dragOverIndex === idx && dragIndex !== idx && 'ring-2 ring-amber/50 ring-offset-2'
+            )}
+          >
+            <GripVertical className="h-4 w-4 mt-2.5 shrink-0 text-muted-foreground/40 cursor-grab active:cursor-grabbing" />
+            <span className="flex h-6 w-6 shrink-0 mt-2 items-center justify-center rounded-full bg-muted text-muted-foreground text-xs select-none">
               {idx + 1}
             </span>
             <Input
