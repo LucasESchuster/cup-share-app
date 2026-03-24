@@ -22,10 +22,11 @@ interface RecipeCardProps {
   recipe: Recipe
   currentUserId?: number
   isAuthenticated?: boolean
+  isOwner?: boolean
 }
 
-export function RecipeCard({ recipe, currentUserId, isAuthenticated = false }: RecipeCardProps) {
-  const isOwner = !!currentUserId && currentUserId === recipe.user?.id
+export function RecipeCard({ recipe, currentUserId, isAuthenticated = false, isOwner: isOwnerProp }: RecipeCardProps) {
+  const isOwner = isOwnerProp ?? (!!currentUserId && currentUserId === recipe.user?.id)
   const CategoryIcon = recipe.brew_method?.category
     ? categoryIcons[recipe.brew_method.category as BrewMethodCategory]
     : null
