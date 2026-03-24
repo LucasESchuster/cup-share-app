@@ -16,7 +16,8 @@ interface LikeButtonProps {
 
 export function LikeButton({ recipeId, initialLikes, initialIsLiked, isAuthenticated, isOwner = false }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(initialIsLiked)
-  const [optimisticLikes, setOptimisticLikes] = useOptimistic(initialLikes)
+  const displayLikes = initialLikes + 1
+  const [optimisticLikes, setOptimisticLikes] = useOptimistic(displayLikes)
   const [isPending, startTransition] = useTransition()
 
   async function handleToggle(e: React.MouseEvent) {
@@ -30,12 +31,12 @@ export function LikeButton({ recipeId, initialLikes, initialIsLiked, isAuthentic
     if (isLiked) {
       setIsLiked(false)
       startTransition(async () => {
-        setOptimisticLikes((prev) => Math.max(0, prev - 1))
+        setOptimisticLikes((prev) => Math.max(1, prev - 1))
         try {
           await unlikeRecipeAction(recipeId)
         } catch {
           setIsLiked(true)
-          setOptimisticLikes(initialLikes)
+          setOptimisticLikes(displayLikes)
         }
       })
     } else {
@@ -46,7 +47,7 @@ export function LikeButton({ recipeId, initialLikes, initialIsLiked, isAuthentic
           await likeRecipeAction(recipeId)
         } catch {
           setIsLiked(false)
-          setOptimisticLikes(initialLikes)
+          setOptimisticLikes(displayLikes)
         }
       })
     }

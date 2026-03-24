@@ -45,7 +45,7 @@ export default async function PerfilPage() {
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {recipes.map((recipe) => (
-                <RecipeCard key={recipe.id} recipe={recipe} currentUserId={user.id} isAuthenticated />
+                <RecipeCard key={recipe.id} recipe={recipe} currentUserId={user.id} isAuthenticated isOwner />
               ))}
             </div>
           )}

@@ -90,10 +90,33 @@ export interface LikesCount {
 
 // ─── Paginated response (Laravel) ────────────────────────────────────────────
 
+export interface PaginatedMeta {
+  current_page: number
+  from: number | null
+  last_page: number
+  per_page: number
+  to: number | null
+  total: number
+}
+
 export interface Paginated<T> {
   data: T[]
   links?: Record<string, string | null>
-  meta?: Record<string, unknown>
+  meta?: PaginatedMeta
+}
+
+// ─── Recipe filters ───────────────────────────────────────────────────────────
+
+export interface RecipeFilters {
+  title?: string
+  brew_method_id?: number
+  category?: BrewMethodCategory
+  user_id?: number
+  published_from?: string
+  published_to?: string
+  sort_by?: 'created_at' | 'likes_count'
+  sort_dir?: 'asc' | 'desc'
+  page?: number
 }
 
 // ─── API Error ────────────────────────────────────────────────────────────────

@@ -1,24 +1,70 @@
 import { Suspense } from 'react'
 import { cookies } from 'next/headers'
 import { getRecipes } from '@/lib/api/recipes'
+import { getBrewMethods } from '@/lib/api/reference'
 import { getMe } from '@/lib/api/users'
 import { RecipeGrid } from '@/components/recipes/RecipeGrid'
+import { RecipeFilters } from '@/components/recipes/RecipeFilters'
+import { RecipePagination } from '@/components/recipes/RecipePagination'
 import { LinkButton } from '@/components/ui/link-button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Plus } from 'lucide-react'
+import type { RecipeFilters as RecipeFiltersType, BrewMethodCategory } from '@/lib/types'
 
-async function RecipesFeed({ isAuthenticated }: { isAuthenticated: boolean }) {
-  const [recipes, currentUser] = await Promise.all([
-    getRecipes(),
+const VALID_CATEGORIES = new Set<BrewMethodCategory>(['filter', 'espresso', 'pressure', 'cold_brew'])
+const VALID_SORT_BY = new Set(['created_at', 'likes_count'])
+const VALID_SORT_DIR = new Set(['asc', 'desc'])
+
+function parseFilters(sp: Record<string, string | string[] | undefined>): RecipeFiltersType {
+  const str = (key: string) => {
+    const v = sp[key]
+    return typeof v === 'string' && v ? v : undefined
+  }
+
+  const title = str('title')
+  const rawCategory = str('category')
+  const category = rawCategory && VALID_CATEGORIES.has(rawCategory as BrewMethodCategory)
+    ? (rawCategory as BrewMethodCategory)
+    : undefined
+  const rawBrewMethodId = str('brew_method_id')
+  const brew_method_id = rawBrewMethodId ? Number(rawBrewMethodId) || undefined : undefined
+  const rawSortBy = str('sort_by')
+  const sort_by = rawSortBy && VALID_SORT_BY.has(rawSortBy)
+    ? (rawSortBy as 'created_at' | 'likes_count')
+    : undefined
+  const rawSortDir = str('sort_dir')
+  const sort_dir = rawSortDir && VALID_SORT_DIR.has(rawSortDir)
+    ? (rawSortDir as 'asc' | 'desc')
+    : undefined
+  const rawPage = str('page')
+  const page = rawPage ? Math.max(1, Number(rawPage) || 1) : undefined
+
+  return { title, category, brew_method_id, sort_by, sort_dir, page }
+}
+
+async function RecipesFeed({
+  filters,
+  isAuthenticated,
+}: {
+  filters: RecipeFiltersType
+  isAuthenticated: boolean
+}) {
+  const [paginatedRecipes, currentUser] = await Promise.all([
+    getRecipes(filters),
     isAuthenticated ? getMe().catch(() => null) : Promise.resolve(null),
   ])
 
+  const { data: recipes, meta } = paginatedRecipes
+
   return (
-    <RecipeGrid
-      recipes={recipes}
-      currentUserId={currentUser?.id}
-      isAuthenticated={isAuthenticated}
-    />
+    <>
+      <RecipeGrid
+        recipes={recipes}
+        currentUserId={currentUser?.id}
+        isAuthenticated={isAuthenticated}
+      />
+      {meta && <RecipePagination meta={meta} />}
+    </>
   )
 }
 
@@ -47,9 +93,19 @@ function RecipesFeedSkeleton() {
   )
 }
 
-export default async function HomePage() {
-  const cookieStore = await cookies()
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const [cookieStore, sp, brewMethods] = await Promise.all([
+    cookies(),
+    searchParams,
+    getBrewMethods(),
+  ])
+
   const isAuthenticated = !!cookieStore.get('cup_share_token')?.value
+  const filters = parseFilters(sp)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
@@ -71,8 +127,12 @@ export default async function HomePage() {
         )}
       </div>
 
+      <Suspense fallback={<div className="mb-8 h-[116px]" />}>
+        <RecipeFilters brewMethods={brewMethods} />
+      </Suspense>
+
       <Suspense fallback={<RecipesFeedSkeleton />}>
-        <RecipesFeed isAuthenticated={isAuthenticated} />
+        <RecipesFeed filters={filters} isAuthenticated={isAuthenticated} />
       </Suspense>
     </div>
   )
