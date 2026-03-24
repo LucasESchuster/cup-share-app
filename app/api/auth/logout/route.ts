@@ -19,5 +19,5 @@ export async function POST() {
   }
 
   await deleteSession()
-  return NextResponse.redirect(new URL('/entrar', process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'))
+  return new NextResponse(null, { status: 200 })
 }
