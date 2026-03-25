@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { User, BookOpen, LogOut } from 'lucide-react'
+import { User, BookOpen, LogOut, ShieldCheck } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 
-export function UserMenu() {
+export function UserMenu({ isAdmin = false }: { isAdmin?: boolean }) {
   async function handleLogout() {
     await fetch('/api/auth/logout', { method: 'POST' })
     window.location.href = '/entrar'
@@ -31,6 +31,15 @@ export function UserMenu() {
           <BookOpen className="h-3.5 w-3.5" />
           Nova receita
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem render={<Link href="/admin" />}>
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Administração
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"

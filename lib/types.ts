@@ -27,6 +27,50 @@ export interface User {
   email: string
   email_verified_at: string | null
   created_at: string
+  is_admin: boolean
+  banned_at?: string | null
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+
+export interface AdminUser {
+  id: number
+  name: string
+  email: string
+  is_admin: boolean
+  banned_at: string | null
+  ban_reason: string | null
+  email_verified_at: string | null
+  created_at: string
+}
+
+export type MagicLinkStatus = 'pending' | 'used' | 'expired'
+
+export interface MagicLink {
+  id: number
+  user: Pick<User, 'id' | 'name' | 'email'>
+  created_at: string
+  expires_at: string
+  used_at: string | null
+  status: MagicLinkStatus
+}
+
+export interface MagicLinkFilters {
+  status?: MagicLinkStatus
+  page?: number
+}
+
+export interface BrewMethodInput {
+  name: string
+  description?: string | null
+  category: BrewMethodCategory
+}
+
+export interface EquipmentInput {
+  name: string
+  brand?: string | null
+  model?: string | null
+  type: EquipmentType
 }
 
 // ─── Equipment ────────────────────────────────────────────────────────────────

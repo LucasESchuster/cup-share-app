@@ -1,4 +1,5 @@
 import 'server-only'
+import { redirect } from 'next/navigation'
 import { getToken } from '@/lib/session'
 
 export class ApiError extends Error {
@@ -38,6 +39,19 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!res.ok) {
     const body = await res.text()
+    if (res.status === 403) {
+      try {
+        const parsed = JSON.parse(body)
+        if (parsed.message === 'Account suspended.') {
+          const params = new URLSearchParams()
+          if (parsed.banned_at) params.set('banned_at', parsed.banned_at)
+          if (parsed.ban_reason) params.set('reason', parsed.ban_reason)
+          redirect(`/suspenso?${params.toString()}`)
+        }
+      } catch (e) {
+        if ((e as { digest?: string }).digest?.startsWith('NEXT_REDIRECT')) throw e
+      }
+    }
     if (res.status === 422) {
       try {
         const parsed = JSON.parse(body)
