@@ -4,10 +4,25 @@ import { Coffee } from 'lucide-react'
 import { ThemeToggle } from './ThemeToggle'
 import { UserMenu } from './UserMenu'
 import { LinkButton } from '@/components/ui/link-button'
+import { getOptionalToken } from '@/lib/dal'
+import { getMe } from '@/lib/api/users'
 
 export async function Header() {
   const cookieStore = await cookies()
   const isAuthenticated = !!cookieStore.get('cup_share_token')?.value
+
+  let isAdmin = false
+  if (isAuthenticated) {
+    try {
+      const token = await getOptionalToken()
+      if (token) {
+        const user = await getMe()
+        isAdmin = user.is_admin ?? false
+      }
+    } catch {
+      // non-critical — swallow errors
+    }
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/85 backdrop-blur-md">
@@ -28,7 +43,7 @@ export async function Header() {
           <ThemeToggle />
 
           {isAuthenticated ? (
-            <UserMenu />
+            <UserMenu isAdmin={isAdmin} />
           ) : (
             <LinkButton href="/entrar" size="sm" className="ml-1.5">
               Entrar
