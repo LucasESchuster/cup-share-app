@@ -12,14 +12,25 @@ export function MagicLinkForm({ errorMessage }: { errorMessage?: string }) {
 
   if (state?.success) {
     return (
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-4">
         <div className="mx-auto w-12 h-12 rounded-full bg-accent flex items-center justify-center">
           <Mail className="h-5 w-5 text-accent-foreground" />
         </div>
-        <h2 className="font-semibold">Verifique seu e-mail</h2>
-        <p className="text-sm text-muted-foreground">
-          Enviamos um link de acesso. Clique nele para entrar.
-        </p>
+        <div className="space-y-1.5">
+          <h2 className="font-semibold">Verifique seu e-mail</h2>
+          <p className="text-sm text-muted-foreground">
+            Enviamos um link de acesso. Clique nele para entrar.
+          </p>
+        </div>
+        <a
+          href="https://mail.google.com/#search/subject%3A%22Cup+Share%22+from%3A%22Cup+Share+API%22"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
+        >
+         
+          Abrir Gmail
+        </a>
       </div>
     )
   }
