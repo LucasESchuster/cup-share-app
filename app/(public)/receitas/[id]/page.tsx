@@ -29,9 +29,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   try {
     const { id } = await params
     const recipe = await getRecipe(id)
+    const url = `https://cup-share.lucaseduardoschuster.com/receitas/${id}`
+    const description = recipe.description ?? `Receita de ${recipe.brew_method.name} por ${recipe.user.name}`
+
     return {
       title: recipe.title,
-      description: recipe.description ?? `Receita de ${recipe.brew_method.name} por ${recipe.user.name}`,
+      description,
+      alternates: { canonical: url },
+      openGraph: {
+        type: 'article',
+        url,
+        title: recipe.title,
+        description,
+        locale: 'pt_BR',
+        publishedTime: recipe.created_at,
+        modifiedTime: recipe.updated_at,
+        authors: [recipe.user.name],
+      },
+      twitter: {
+        card: 'summary',
+        title: recipe.title,
+        description,
+      },
     }
   } catch {
     return { title: 'Receita' }

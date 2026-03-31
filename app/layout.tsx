@@ -21,11 +21,29 @@ const fraunces = Fraunces({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://cup-share.lucaseduardoschuster.com'),
   title: {
     default: 'Cup Share',
     template: '%s | Cup Share',
   },
   description: 'Compartilhe e descubra receitas de café excepcionais.',
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: 'https://cup-share.lucaseduardoschuster.com',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    url: 'https://cup-share.lucaseduardoschuster.com',
+    siteName: 'Cup Share',
+    title: 'Cup Share',
+    description: 'Compartilhe e descubra receitas de café excepcionais.',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Cup Share',
+    description: 'Compartilhe e descubra receitas de café excepcionais.',
+  },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
