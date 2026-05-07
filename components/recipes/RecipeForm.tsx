@@ -698,13 +698,13 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
         </div>
       )}
 
-      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+      <div className="space-y-3 pt-2">
         <TurnstileWidget onToken={setTurnstileToken} />
         <input type="hidden" name="cf-turnstile-response" value={turnstileToken ?? ''} />
         <Button
           type="submit"
           disabled={isPending || !turnstileToken}
-          className="flex-1 sm:flex-none"
+          className="w-full sm:w-auto"
         >
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isEditing ? 'Salvar alterações' : 'Publicar receita'}
