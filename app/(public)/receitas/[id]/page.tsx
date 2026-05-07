@@ -70,8 +70,12 @@ function getYouTubeEmbedUrl(url: string): string | null {
     let videoId: string | null = null
     if (parsed.hostname.includes('youtube.com')) {
       videoId = parsed.searchParams.get('v')
+      if (!videoId) {
+        const match = parsed.pathname.match(/^\/(?:shorts|embed|v|live)\/([\w-]{11})/)
+        if (match) videoId = match[1]
+      }
     } else if (parsed.hostname === 'youtu.be') {
-      videoId = parsed.pathname.slice(1)
+      videoId = parsed.pathname.slice(1).split('/')[0] || null
     }
     return videoId ? `https://www.youtube.com/embed/${videoId}` : null
   } catch {

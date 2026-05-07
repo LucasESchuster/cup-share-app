@@ -19,6 +19,11 @@ export async function createRecipeAction(
 ): Promise<ActionState> {
   await verifySession()
 
+  const turnstileToken = formData.get('cf-turnstile-response')?.toString()
+  if (!turnstileToken) {
+    return { error: 'Complete a verificação anti-bot e tente novamente.' }
+  }
+
   const raw = Object.fromEntries(formData)
   const parsed = RecipeFormSchema.safeParse({
     ...raw,
@@ -39,13 +44,16 @@ export async function createRecipeAction(
   }
 
   try {
-    const recipe = await createRecipe(parsed.data)
+    const recipe = await createRecipe(parsed.data, turnstileToken)
     revalidatePath('/')
     redirect(`/receitas/${recipe.id}`)
   } catch (err: unknown) {
     if (isRedirectError(err)) throw err
     if (err && typeof err === 'object' && 'errors' in err) {
-      return { errors: (err as { errors: Record<string, string[]> }).errors }
+      const apiErrors = (err as { errors: Record<string, string[]> }).errors
+      const turnstileError = apiErrors.cf_turnstile_response?.[0]
+      if (turnstileError) return { error: turnstileError }
+      return { errors: apiErrors }
     }
     return { error: 'Erro ao criar receita. Tente novamente.' }
   }
@@ -58,6 +66,11 @@ export async function updateRecipeAction(
 ): Promise<ActionState> {
   await verifySession()
 
+  const turnstileToken = formData.get('cf-turnstile-response')?.toString()
+  if (!turnstileToken) {
+    return { error: 'Complete a verificação anti-bot e tente novamente.' }
+  }
+
   const raw = Object.fromEntries(formData)
   const parsed = RecipeFormSchema.safeParse({
     ...raw,
@@ -78,14 +91,17 @@ export async function updateRecipeAction(
   }
 
   try {
-    await updateRecipe(id, parsed.data)
+    await updateRecipe(id, parsed.data, turnstileToken)
     revalidatePath(`/receitas/${id}`)
     revalidatePath('/')
     redirect(`/receitas/${id}`)
   } catch (err: unknown) {
     if (isRedirectError(err)) throw err
     if (err && typeof err === 'object' && 'errors' in err) {
-      return { errors: (err as { errors: Record<string, string[]> }).errors }
+      const apiErrors = (err as { errors: Record<string, string[]> }).errors
+      const turnstileError = apiErrors.cf_turnstile_response?.[0]
+      if (turnstileError) return { error: turnstileError }
+      return { errors: apiErrors }
     }
     return { error: 'Erro ao atualizar receita. Tente novamente.' }
   }

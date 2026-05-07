@@ -41,18 +41,22 @@ export function getRecipeLikes(id: number | string): Promise<LikesCount> {
   return apiFetch(`/recipes/${id}/likes`)
 }
 
-export async function createRecipe(data: RecipeFormValues): Promise<Recipe> {
+export async function createRecipe(data: RecipeFormValues, turnstileToken?: string): Promise<Recipe> {
   const res = await apiFetch<Recipe | { data: Recipe }>('/recipes', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, cf_turnstile_response: turnstileToken }),
   })
   return unwrapOne(res)
 }
 
-export async function updateRecipe(id: number | string, data: RecipeFormValues): Promise<Recipe> {
+export async function updateRecipe(
+  id: number | string,
+  data: RecipeFormValues,
+  turnstileToken?: string
+): Promise<Recipe> {
   const res = await apiFetch<Recipe | { data: Recipe }>(`/recipes/${id}`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, cf_turnstile_response: turnstileToken }),
   })
   return unwrapOne(res)
 }
