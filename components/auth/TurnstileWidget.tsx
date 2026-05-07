@@ -40,7 +40,7 @@ export function TurnstileWidget({ onToken }: TurnstileWidgetProps) {
     <Turnstile
       ref={ref}
       siteKey={siteKey}
-      options={{ theme, language: 'pt-BR' }}
+      options={{ theme, language: 'pt-br' }}
       onSuccess={(token) => onToken(token)}
       onExpire={() => {
         onToken(undefined)
