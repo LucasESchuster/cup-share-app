@@ -1,14 +1,16 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { Mail, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
 import { requestMagicLink } from '@/app/actions/auth'
 
 export function MagicLinkForm({ errorMessage }: { errorMessage?: string }) {
   const [state, action, pending] = useActionState(requestMagicLink, undefined)
+  const [token, setToken] = useState<string | undefined>()
 
   if (state?.success) {
     return (
@@ -28,7 +30,7 @@ export function MagicLinkForm({ errorMessage }: { errorMessage?: string }) {
           rel="noopener noreferrer"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-         
+
           Abrir Gmail
         </a>
       </div>
@@ -50,11 +52,14 @@ export function MagicLinkForm({ errorMessage }: { errorMessage?: string }) {
         />
       </div>
 
+      <TurnstileWidget onToken={setToken} />
+      <input type="hidden" name="cf-turnstile-response" value={token ?? ''} />
+
       {(state?.error || errorMessage) && (
         <p className="text-sm text-destructive">{state?.error ?? errorMessage}</p>
       )}
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <Button type="submit" className="w-full" disabled={pending || !token}>
         {pending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
         ) : (

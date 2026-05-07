@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
+import { TurnstileWidget } from '@/components/auth/TurnstileWidget'
 import { createRecipeAction, updateRecipeAction } from '@/app/actions/recipes'
 import type { BrewMethod, Equipment, Recipe } from '@/lib/types'
 
@@ -63,6 +64,7 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
   const [isPending, startTransition] = useTransition()
   const [errors, setErrors] = useState<Record<string, string[]>>({})
   const [generalError, setGeneralError] = useState<string>()
+  const [turnstileToken, setTurnstileToken] = useState<string | undefined>()
 
   // Basic fields — controlled for draft persistence
   const [title, setTitle] = useState(recipe?.title ?? '')
@@ -696,8 +698,14 @@ export function RecipeForm({ brewMethods, equipment, recipe }: RecipeFormProps) 
         </div>
       )}
 
-      <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={isPending} className="flex-1 sm:flex-none">
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:items-center">
+        <TurnstileWidget onToken={setTurnstileToken} />
+        <input type="hidden" name="cf-turnstile-response" value={turnstileToken ?? ''} />
+        <Button
+          type="submit"
+          disabled={isPending || !turnstileToken}
+          className="flex-1 sm:flex-none"
+        >
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isEditing ? 'Salvar alterações' : 'Publicar receita'}
         </Button>
